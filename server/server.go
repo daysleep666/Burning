@@ -34,7 +34,7 @@ func (c *connections) sendAll(_contentChan chan string) {
 	for _, v := range c.conns {
 		v.send(content)
 	}
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 1)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
