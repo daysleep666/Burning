@@ -42,11 +42,11 @@ type connections struct {
 }
 
 func (c *connections) add(_conn *connection) error {
-	for _, v := range c.conns {
-		if v.ip == _conn.ip {
-			return fmt.Errorf("%v has joined", v.ip)
-		}
-	}
+	// for _, v := range c.conns {
+	// 	if v.ip == _conn.ip {
+	// 		return fmt.Errorf("%v has joined", v.ip)
+	// 	}
+	// }
 	c.conns = append(c.conns, _conn)
 	return nil
 }
