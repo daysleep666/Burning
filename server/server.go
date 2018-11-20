@@ -30,6 +30,7 @@ func (c *connection) reading() (string, error) {
 
 func (c *connections) sendAll(_contentChan chan string) {
 	content := <-_contentChan
+	fmt.Println("len=", len(c.conns))
 	for _, v := range c.conns {
 		v.send(content)
 	}
@@ -51,9 +52,9 @@ func (c *connections) add(_conn *connection) error {
 	return nil
 }
 
-func (c *connections) delete(_ip string) (*connection, error) {
+func (c *connections) delete(_conn *connection) (*connection, error) {
 	for i, v := range c.conns {
-		if v.ip == _ip {
+		if v.ip == _conn.ip && v.nickName == _conn.nickName {
 			if len(c.conns) == 1 {
 				c.conns = []*connection{}
 			} else {
@@ -63,7 +64,7 @@ func (c *connections) delete(_ip string) (*connection, error) {
 			return v, nil
 		}
 	}
-	return nil, fmt.Errorf("not exist %v", _ip)
+	return nil, fmt.Errorf("not exist ")
 }
 
 func (c *connections) init(_conn *connection) error {
@@ -78,7 +79,7 @@ func (c *connections) init(_conn *connection) error {
 		_conn.send("please input your nickname")
 		nickname, err = _conn.reading()
 		if err != nil {
-			c.delete(_conn.ip)
+			c.delete(_conn)
 			return err
 		}
 		_conn.nickName = nickname
@@ -126,11 +127,12 @@ func main() {
 					content, err := connection.reading()
 					if err != nil {
 						connection.send(fmt.Sprintf("错误:%v", err))
-						conns.delete(connection.ip)
+						conns.delete(connection)
 						fmt.Printf("%v left\n", connection.nickName)
 						break
 					}
 					contentChan <- content
+					fmt.Println("says:", content)
 				}
 			}()
 		}
