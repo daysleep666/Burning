@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"github.com/daysleep666/Burning/tool"
 )
@@ -30,10 +31,10 @@ func (c *connection) reading() (string, error) {
 
 func (c *connections) sendAll(_contentChan chan string) {
 	content := <-_contentChan
-	fmt.Println("len=", len(c.conns))
 	for _, v := range c.conns {
 		v.send(content)
 	}
+	time.Sleep(time.Second)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -43,11 +44,6 @@ type connections struct {
 }
 
 func (c *connections) add(_conn *connection) error {
-	// for _, v := range c.conns {
-	// 	if v.ip == _conn.ip {
-	// 		return fmt.Errorf("%v has joined", v.ip)
-	// 	}
-	// }
 	c.conns = append(c.conns, _conn)
 	return nil
 }
@@ -64,7 +60,7 @@ func (c *connections) delete(_conn *connection) (*connection, error) {
 			return v, nil
 		}
 	}
-	return nil, fmt.Errorf("not exist ")
+	return nil, fmt.Errorf("not exist")
 }
 
 func (c *connections) init(_conn *connection) error {
@@ -75,7 +71,6 @@ func (c *connections) init(_conn *connection) error {
 
 	// nickname
 	for err != nil {
-		// type： writer or reader
 		_conn.send("please input your nickname")
 		nickname, err = _conn.reading()
 		if err != nil {
@@ -132,7 +127,6 @@ func main() {
 						break
 					}
 					contentChan <- content
-					fmt.Println("says:", content)
 				}
 			}()
 		}

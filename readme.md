@@ -10,6 +10,6 @@ go run clientreader/client.go ip:port
 
 go run clientwrite/client.go ip:port
 
-
+例子:
 go run clientreader/client.go 10.0.0.66:1234
 go run clientwrite/client.go 10.0.0.66:1234
