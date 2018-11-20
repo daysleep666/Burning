@@ -25,18 +25,6 @@ func main() {
 			userContent := string(bs)
 			fmt.Printf("\033[34m%v", string(userContent))
 			time.Sleep(time.Second * 1)
-			// // var bn string = "\b"
-			// // for _, _ = range userContent {
-			// // 	bn += "\b"
-			// // }
-			// // fmt.Printf(bn)
-			// fmt.Printf("\033[999D")
-			// for _, v := range string(userContent) {
-			// 	if v == 0 {
-			// 		break
-			// 	}
-			// 	fmt.Printf(" ")
-			// }
 			fmt.Printf("\033[999D\033[K")
 
 		}
