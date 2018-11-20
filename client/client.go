@@ -13,7 +13,6 @@ func main() {
 	ip := os.Args[1]
 	fmt.Println(ip)
 	conn, err := net.Dial("tcp", ip)
-	var stopWrite bool
 	defer conn.Close()
 	tool.CheckErr(err)
 	go func() {
@@ -24,35 +23,31 @@ func main() {
 				return
 			}
 			userContent := string(bs)
-			fmt.Printf(string(userContent))
-			if userContent == "welcome" {
-				stopWrite = true
-			}
-			if !stopWrite {
-				continue
-			}
+			fmt.Printf("\033[34m%v", string(userContent))
 			time.Sleep(time.Second * 1)
-			var bn string = "\b"
-			for _, _ = range userContent {
-				bn += "\b"
-			}
-			fmt.Printf(bn)
-			for _, v := range string(userContent) {
-				if v == 0 {
-					break
-				}
-				fmt.Printf("..")
-			}
-			fmt.Println()
+			// // var bn string = "\b"
+			// // for _, _ = range userContent {
+			// // 	bn += "\b"
+			// // }
+			// // fmt.Printf(bn)
+			// fmt.Printf("\033[999D")
+			// for _, v := range string(userContent) {
+			// 	if v == 0 {
+			// 		break
+			// 	}
+			// 	fmt.Printf(" ")
+			// }
+			fmt.Printf("\033[999D\033[K")
+
 		}
 	}()
+
 	for {
 		var content string
 		fmt.Scanln(&content)
-		if stopWrite {
-			break
-		}
 		conn.Write([]byte(content))
+		// fmt.Printf("\033[%dA\r\033[%dC", 1, 0)
+		fmt.Printf("\033[1A\033[999D\033[K")
 	}
 	var w chan int
 	<-w

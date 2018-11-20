@@ -59,6 +59,7 @@ func (c *connections) delete(_ip string) (*connection, error) {
 			} else {
 				c.conns = append(c.conns[0:i], c.conns[i+1:]...)
 			}
+			v.conn.Close()
 			return v, nil
 		}
 	}
@@ -74,7 +75,7 @@ func (c *connections) init(_conn *connection) error {
 	// nickname
 	for err != nil {
 		// type： writer or reader
-		_conn.send("please input your nickname\n")
+		_conn.send("please input your nickname")
 		nickname, err = _conn.reading()
 		if err != nil {
 			c.delete(_conn.ip)
@@ -125,7 +126,9 @@ func main() {
 				for {
 					content, err := connection.reading()
 					if err != nil {
-						conn.Write([]byte(fmt.Sprintf("错误:%v", err)))
+						connection.send(fmt.Sprintf("错误:%v", err))
+						conns.delete(connection.ip)
+						fmt.Printf("%v left\n", connection.nickName)
 						break
 					}
 					contentChan <- content
