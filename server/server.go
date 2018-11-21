@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"time"
 
 	"github.com/daysleep666/Burning/tool"
 )
@@ -34,7 +33,6 @@ func (c *connections) sendAll(_contentChan chan string) {
 	for _, v := range c.conns {
 		v.send(content)
 	}
-	time.Sleep(time.Second * 1)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------

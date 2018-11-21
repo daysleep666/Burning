@@ -20,7 +20,6 @@ func clearTerminal() {
 func main() {
 	var (
 		myMsg    string
-		oneRune  string
 		index    int
 		contents chan string = make(chan string, 1000)
 	)
@@ -62,7 +61,7 @@ func main() {
 	go func() {
 		for {
 			m.RLock()
-			fmt.Printf("\033[35m\033[5;%vH%v", index, oneRune)
+			fmt.Printf("\033[35m\033[5;1H%v", myMsg)
 			m.RUnlock()
 		}
 	}()
@@ -75,7 +74,6 @@ func main() {
 				m.Lock()
 				conn.Write([]byte(myMsg))
 				index = 0
-				oneRune = ""
 				myMsg = ""
 				fmt.Printf("\033[33m\033[5;1H\033[K")
 				m.Unlock()
@@ -84,16 +82,14 @@ func main() {
 				m.Lock()
 				if index != 0 {
 					index--
+					myMsg = myMsg[:len(myMsg)-1]
 				}
-				oneRune = ""
-				myMsg = myMsg[:len(myMsg)-1]
 				fmt.Printf("\033[34m\033[5;%vH\033[K", index+1)
 				m.Unlock()
 
 			case termbox.KeySpace:
 				index++
-				oneRune = " "
-				myMsg += oneRune
+				myMsg += string(ev.Ch)
 
 			case termbox.KeyCtrlC:
 				fmt.Printf("You press ctrl c")
@@ -101,8 +97,7 @@ func main() {
 
 			default:
 				index++
-				oneRune = string(ev.Ch)
-				myMsg += oneRune
+				myMsg += string(ev.Ch)
 				// break
 			}
 		}
