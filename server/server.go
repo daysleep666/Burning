@@ -17,8 +17,7 @@ type connection struct {
 }
 
 func (c *connection) send(_content string) error {
-	content := c.nickName + ":" + _content
-	_, err := c.conn.Write([]byte(content))
+	_, err := c.conn.Write([]byte(_content))
 	return err
 }
 
@@ -124,6 +123,7 @@ func main() {
 						fmt.Printf("%v left\n", connection.nickName)
 						break
 					}
+					content = connection.nickName + ": " + content
 					contentChan <- content
 				}
 			}()
