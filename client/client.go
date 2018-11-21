@@ -28,6 +28,14 @@ func main() {
 
 		}
 	}()
+
+	for {
+		var content string
+		fmt.Scanln(&content)
+		conn.Write([]byte(content))
+		fmt.Printf("\033[33m\033[1A\033[999D\033[K")
+	}
+
 	conn.Write([]byte("reader"))
 	var w chan int
 	<-w
