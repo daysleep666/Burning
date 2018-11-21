@@ -8,14 +8,18 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
+var m sync.RWMutex
+
 func main() {
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
 	}
-	defer termbox.Close()
-
-	fmt.Printf("\033[2J")
+	defer func() {
+		clearTerminal()
+		termbox.Close()
+	}()
+	clearTerminal()
 	go func() {
 		for {
 			shua(1, 1)
@@ -36,15 +40,11 @@ func main() {
 
 	var content string
 	var index int
-	var m sync.RWMutex
 	go func() {
 		for {
 			m.RLock()
-			fmt.Printf("\033[5;%vH%v", index, content)
+			fmt.Printf("\033[35m\033[5;%vH%v", index, content)
 			m.RUnlock()
-			// var content string
-			// fmt.Scanln(&content)
-			// fmt.Printf("\033[33m\033[1A\033[999D\033[K")
 		}
 	}()
 
@@ -52,9 +52,6 @@ func main() {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
-			case termbox.KeyCtrlC:
-				fmt.Printf("You press ctrl c")
-				return
 			case termbox.KeyEnter:
 				m.Lock()
 				index = 0
@@ -64,10 +61,16 @@ func main() {
 
 			case termbox.KeyBackspace2:
 				m.Lock()
-				index--
+				if index != 0 {
+					index--
+				}
 				content = ""
-				fmt.Printf("\033[34m\033[5;%vH\033[K", index)
+				fmt.Printf("\033[34m\033[5;%vH\033[K", index+1)
 				m.Unlock()
+
+			case termbox.KeyCtrlC:
+				fmt.Printf("You press ctrl c")
+				return
 
 			default:
 				index++
@@ -83,7 +86,11 @@ func main() {
 }
 
 func shua(_row, _column int) {
-	fmt.Printf("\033[%v;%vHi'm text", _row, _column)
+	fmt.Printf("\033[36m\033[%v;%vHi'm text", _row, _column)
 	time.Sleep(time.Second)
 	fmt.Printf("\033[%v;%vH\033[999D\033[K", _row, _column)
+}
+
+func clearTerminal() {
+	fmt.Printf("\033[2J")
 }

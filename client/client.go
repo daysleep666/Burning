@@ -4,16 +4,40 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/daysleep666/Burning/tool"
+	termbox "github.com/nsf/termbox-go"
 )
 
+var m sync.RWMutex
+
+func clearTerminal() {
+	fmt.Printf("\033[2J")
+}
+
 func main() {
+	var (
+		myMsg    string
+		oneRune  string
+		index    int
+		contents chan string = make(chan string, 1000)
+	)
+	// init
 	ip := os.Args[1]
 	conn, err := net.Dial("tcp", ip)
-	defer conn.Close()
 	tool.CheckErr(err)
+	err = termbox.Init()
+	tool.CheckErr(err)
+	clearTerminal()
+	defer func() {
+		clearTerminal()
+		termbox.Close()
+		conn.Close()
+	}()
+
+	// read
 	go func() {
 		for {
 			bs := make([]byte, 10000)
@@ -21,22 +45,75 @@ func main() {
 			if err != nil {
 				return
 			}
-			userContent := string(bs)
-			fmt.Printf("\033[34m%v", string(userContent))
-			time.Sleep(time.Second * 1)
-			fmt.Printf("\033[999D\033[K")
+			contents <- string(bs)
+		}
+	}()
 
+	go func() {
+		for {
+			content := <-contents
+			fmt.Printf("\033[36m\033[1;1H%v", content)
+			time.Sleep(time.Second)
+			fmt.Printf("\033[1;1H\033[999D\033[K")
+		}
+	}()
+
+	// write
+	go func() {
+		for {
+			m.RLock()
+			fmt.Printf("\033[35m\033[5;%vH%v", index, oneRune)
+			m.RUnlock()
 		}
 	}()
 
 	for {
-		var content string
-		fmt.Scanln(&content)
-		conn.Write([]byte(content))
-		fmt.Printf("\033[33m\033[1A\033[999D\033[K")
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Key {
+			case termbox.KeyEnter:
+				m.Lock()
+				conn.Write([]byte(myMsg))
+				index = 0
+				oneRune = ""
+				myMsg = ""
+				fmt.Printf("\033[33m\033[5;1H\033[K")
+				m.Unlock()
+
+			case termbox.KeyBackspace2:
+				m.Lock()
+				if index != 0 {
+					index--
+				}
+				oneRune = ""
+				myMsg = myMsg[:len(myMsg)-1]
+				fmt.Printf("\033[34m\033[5;%vH\033[K", index+1)
+				m.Unlock()
+
+			case termbox.KeySpace:
+				index++
+				oneRune = " "
+				myMsg += oneRune
+
+			case termbox.KeyCtrlC:
+				fmt.Printf("You press ctrl c")
+				return
+
+			default:
+				index++
+				oneRune = string(ev.Ch)
+				myMsg += oneRune
+				// break
+			}
+		}
 	}
 
-	conn.Write([]byte("reader"))
 	var w chan int
 	<-w
+}
+
+func display(_row, _column int, _content string) {
+	fmt.Printf("\033[36m\033[%v;%vH%v", _row, _column, _content)
+	time.Sleep(time.Second * 3)
+	fmt.Printf("\033[1;1H\033[999D\033[K")
 }

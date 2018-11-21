@@ -96,7 +96,7 @@ func newConnection(_conn net.Conn) *connection {
 
 func main() {
 	port := os.Args[1]
-	fmt.Println("Burning after reading v1.0    bind in ", port)
+	fmt.Println("Burning after reading v0.2    bind in ", port)
 	ln, err := net.Listen("tcp", "0.0.0.0"+":"+port)
 	tool.CheckErr(err)
 	contentChan := make(chan string)
