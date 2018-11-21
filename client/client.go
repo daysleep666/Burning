@@ -6,7 +6,6 @@ import (
 	"os"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/daysleep666/Burning/tool"
 	termbox "github.com/nsf/termbox-go"
@@ -21,7 +20,6 @@ func clearTerminal() {
 func main() {
 	var (
 		myMsg    []rune
-		index    int
 		contents chan string = make(chan string, 1000)
 	)
 	// init
@@ -74,31 +72,27 @@ func main() {
 			case termbox.KeyEnter:
 				m.Lock()
 				conn.Write([]byte(string(myMsg)))
-				index = 0
 				myMsg = []rune{}
 				fmt.Printf("\033[33m\033[5;1H\033[K")
 				m.Unlock()
 
 			case termbox.KeyBackspace2:
 				m.Lock()
-				if index != 0 {
-					index -= utf8.RuneLen(myMsg[len(myMsg)-1])
+				if len(myMsg) != 0 {
 					myMsg = myMsg[:len(myMsg)-1]
 				}
 
-				fmt.Printf("\033[34m\033[5;%vH\033[K", index+1)
+				fmt.Printf("\033[34m\033[5;%vH\033[K", len(myMsg))
 				m.Unlock()
 
 			case termbox.KeySpace:
-				index += 1
-				myMsg = append(myMsg, ev.Ch)
+				myMsg = append(myMsg, rune(32))
 
 			case termbox.KeyCtrlC:
 				fmt.Printf("You press ctrl c")
 				return
 
 			default:
-				index += utf8.RuneLen(ev.Ch)
 				myMsg = append(myMsg, ev.Ch)
 			}
 		}
