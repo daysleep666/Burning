@@ -2,14 +2,11 @@
 
 go run server/server.go port
 
-启动客户端读屏
+启动客户端
 
-go run clientreader/client.go ip:port
+go run client/client.go ip:port
 
-启动 客户端写屏
-
-go run clientwrite/client.go ip:port
+目前不支持中文输入法
 
 例子:
-go run clientreader/client.go 10.0.0.66:1234
-go run clientwrite/client.go 10.0.0.66:1234
+go run client/client.go 10.0.0.66:1234
