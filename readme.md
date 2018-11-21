@@ -1,3 +1,5 @@
+![图片描述](https://github.com/daysleep666/Burning/blob/master/b.gif?raw=true)
+
 启动服务器
 
 go run server/server.go port
