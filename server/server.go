@@ -81,7 +81,7 @@ func (c *connections) init(_conn *connection) error {
 		_conn.send("failed")
 		return err
 	}
-	_conn.send("welcome")
+	_conn.send("welcome. HelpCommand:[\\help]")
 	return nil
 }
 
@@ -90,6 +90,21 @@ func (c *connections) init(_conn *connection) error {
 func newConnection(_conn net.Conn) *connection {
 	return &connection{ip: _conn.LocalAddr().String(), conn: _conn}
 }
+
+func IsQuery(_content string) (string, bool) {
+	switch _content {
+	case "\\help":
+		return fmt.Sprintf("查询总人数：【\\tp】"), true
+
+	case "\\tp":
+		return fmt.Sprintf("TotalPopulation:%v", totalCount), true
+
+	default:
+		return "", false
+	}
+}
+
+var totalCount int64
 
 func main() {
 	port := os.Args[1]
@@ -113,16 +128,23 @@ func main() {
 				continue
 			}
 			fmt.Printf("%v joined\n", connection.nickName)
-
+			totalCount++
 			go func() {
 				for {
 					content, err := connection.reading()
 					if err != nil {
 						connection.send(fmt.Sprintf("错误:%v", err))
 						conns.delete(connection)
+						totalCount--
 						fmt.Printf("%v left\n", connection.nickName)
 						break
 					}
+
+					if str, isQuery := IsQuery(content); isQuery {
+						connection.send(str)
+						continue
+					}
+
 					content = connection.nickName + ": " + content
 					contentChan <- content
 				}
